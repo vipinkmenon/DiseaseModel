@@ -20,29 +20,43 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module agent #(parameter Nodeaddress =0) (
-input wire clk,
-input wire [3:0] neighbourEdges,
-output wire [3:0] outputEdges,
-input wire [31:0] seedValue,
-input wire loadSeed,
-input wire [1:0] address,
-input wire initState,
-input wire loadState,
-output wire currState
+module agent #(parameter Nodeaddress =0,parameter numAgents = 100) (
+input  wire clk,
+input  wire [numAgents-1:0] neighbourEdges,
+output wire [numAgents-1:0] outputEdges,
+input  wire [31:0] seedValue,
+input  wire loadSeed,
+input  wire [31:0] address,
+input  wire initState,
+input  wire loadState,
+output wire currState,
+input  wire loadConnectivity,
+input  wire [31:0] valConnectivity
 );
 
-
+reg [numAgents-1:0] connectivityReg;
 reg state;
 wire infect;
 wire recover;
+wire infectNeighbour;
+integer offset=0;
 
 assign infect = |neighbourEdges;
+assign outputEdges = connectivityReg & {numAgents{infectNeighbour}};
 
 localparam SUS = 0,
            INF = 1;
 
 assign currState = state;
+
+always @(posedge clk)
+begin
+    if(loadConnectivity)
+    begin
+        connectivityReg[offset*32+:32] <= valConnectivity;
+        offset <= offset+1;
+    end
+end
 
 always @(posedge clk)
 begin
@@ -66,6 +80,13 @@ end
 prbs recovRateGen(
     .clk(clk),
     .dataOut(recover),
+    .loadSeed(loadSeed & (address== Nodeaddress)),
+    .seedValue(seedValue)
+);
+
+prbs infectRateGen(
+    .clk(clk),
+    .dataOut(infectNeighbour),
     .loadSeed(loadSeed & (address== Nodeaddress)),
     .seedValue(seedValue)
 );
