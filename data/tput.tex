@@ -1,0 +1,25 @@
+%\documentclass{article}
+\documentclass{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.7}
+\pgfplotsset{every axis/.append style={font=\footnotesize,semithick,tick style={thick}}}
+\begin{document}
+    %\begin{figure}
+        \centering
+        \begin{tikzpicture}[scale=2.0]
+            \begin{axis}[width=\textwidth,height=0.6\textwidth,xlabel=Time (ticks) ,ylabel= Probability,legend pos=south east,legend cell align=left,legend style={font=\tiny}]
+                \addplot [color = red]table[x=tickNum,y=node1] {log_0_4_0_8.txt};        
+                \addplot [color = blue]table[x=tickNum,y=node2] {log_0_4_0_8.txt};   
+                \addplot [color = green]table[x=tickNum,y=node3] {log_0_4_0_8.txt};  
+                \addplot [color = black]table[x=tickNum,y=node4] {log_0_4_0_8.txt};  
+                \addplot [color = orange]table[x=tickNum,y=node5] {log_0_4_0_8.txt};  
+                \addplot [color = brown]table[x=tickNum,y=node6] {log_0_4_0_8.txt};  
+                \addplot [color = yellow]table[x=tickNum,y=node7] {log_0_4_0_8.txt};  
+                \addplot [color = violet]table[x=tickNum,y=node8] {log_0_4_0_8.txt};  
+                \addplot [color = gray]table[x=tickNum,y=node9] {log_0_4_0_8.txt};  
+                \addplot [color = purple]table[x=tickNum,y=node10] {log_0_4_0_8.txt};       
+                \legend{node1,node2,node3,node4,node5,node6,node7,node8,node9,node10}  
+            \end{axis}
+        \end{tikzpicture}%
+    %\end{figure}
+\end{document}

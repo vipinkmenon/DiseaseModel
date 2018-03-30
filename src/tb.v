@@ -24,10 +24,15 @@ module tb();
 
 
 reg clk;
-reg loadseed;
-reg initState;
 reg loadState;
-reg [3:0] randomNeighbours;
+reg [9:0] initStates=0;
+reg [31:0] nodeStates[9:0];
+wire [9:0] nodeState;
+integer i;
+integer numTicks = 1;
+integer logFile;
+reg start = 0;
+
 
 initial
 begin
@@ -41,34 +46,45 @@ end
 
 initial
 begin
-    loadseed = 0;
-    initState = 0;
+    logFile = $fopen("log.txt","w");
+    $fwrite(logFile,"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n","tickNum","node1","node2","node3","node4","node5","node6","node7","node8","node9","node10");
+    for(i=0;i<10;i=i+1)
+        nodeStates[i] = 0;
+    initStates = 'b0000000001;
     loadState = 0;
-    #5;
+    #5000;
     @(posedge clk);
-    loadState = 1;
+    loadState <= 1;
     @(posedge clk);
-    loadState = 0;
+    loadState <= 0;
+    start <= 1;
+    wait(numTicks == 500);
+    $fclose(logFile);
+    $stop;
 end
 
-agent ag (
-    .clk(clk),
-    .neighbourEdges(randomNeighbours),
-    .outputEdges(),
-    .seedValue(0),
-    .loadSeed(loadseed),
-    .address(0),
-    .initState(initState),
-    .loadState(loadState),
-    .currState()
-);
-
-always @(posedge clk)
+always@(posedge clk)
 begin
-randomNeighbours[0] = $urandom()%2;
-randomNeighbours[1] = $urandom()%2;
-randomNeighbours[2] = 0;//$urandom()%2;
-randomNeighbours[3] = 0;//$urandom()%2;
+    if(start)
+    begin
+        numTicks <= numTicks + 1;
+        for(i=0;i<10;i=i+1)
+        begin
+            if(nodeState[i] == 1)
+            begin
+                nodeStates[i] = nodeStates[i]+1;
+            end
+        end
+        //$fwrite(logFile,"%0d\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n",numTicks,nodeStates[0]*1.0/numTicks,nodeStates[1]*1.0/numTicks,nodeStates[2]*1.0/numTicks,nodeStates[3]*1.0/numTicks,nodeStates[4]*1.0/numTicks,nodeStates[5]*1.0/numTicks,nodeStates[6]*1.0/numTicks,nodeStates[7]*1.0/numTicks,nodeStates[8]*1.0/numTicks,nodeStates[9]*1.0/numTicks);
+        $fwrite(logFile,"%0d\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d\t%0d\n",numTicks,nodeState[0],nodeState[1],nodeState[2],nodeState[3],nodeState[4],nodeState[5],nodeState[6],nodeState[7],nodeState[8],nodeState[9]);
+    end
 end
+
+network dut(
+    .clk(clk),
+    .states(nodeState),
+    .initSate(initStates),
+    .loadState(loadState)
+);
 
 endmodule

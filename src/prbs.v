@@ -20,39 +20,50 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module prbs(
-input wire clk,
-output reg dataOut,
-input wire loadSeed,
-input wire [31:0] seedValue
+module prbs #(parameter seed = 0, parameter threshold = 2,parameter type = 0) 
+(
+    input wire clk,
+    output reg dataOut
 );
 
 reg [1:32] lfsr;
-integer i;
+integer i=0,j=0;
 
 initial
 begin
-    lfsr = 32'd0;
+    lfsr = seed;
 end
 
 always @(posedge clk)
 begin
-    if(loadSeed)
-        lfsr <= seedValue;
+    lfsr[1] <= ~(lfsr[32]^lfsr[22]^lfsr[2]^lfsr[1]);
+    lfsr[2:32] <= lfsr[1:31];
+end
+
+always @(posedge clk)
+begin
+    if(!type)
+    begin
+        if(lfsr >= threshold)
+            dataOut <= 1'b1;
+        else
+            dataOut <= 1'b0;
+    end
     else
     begin
-        lfsr[1] <= ~(lfsr[32]^lfsr[22]^lfsr[2]^lfsr[1]);
-        lfsr[2:32] <= lfsr[1:31];
+        if(lfsr < threshold)
+            dataOut <= 1'b1;
+        else
+            dataOut <= 1'b0;
     end
 end
 
+
 always @(posedge clk)
 begin
-    if(lfsr >= 32'h7FFFFFFF)
-        dataOut <= 1'b1;
-    else
-        dataOut <= 1'b0;
+    j = j+1;
+    if(dataOut)
+        i = i+1;
 end
-
 
 endmodule
