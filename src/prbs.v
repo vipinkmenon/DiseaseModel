@@ -27,7 +27,6 @@ module prbs #(parameter seed = 0, parameter threshold = 2,parameter type = 0)
 );
 
 reg [1:32] lfsr;
-integer i=0,j=0;
 
 initial
 begin
@@ -56,14 +55,6 @@ begin
         else
             dataOut <= 1'b0;
     end
-end
-
-
-always @(posedge clk)
-begin
-    j = j+1;
-    if(dataOut)
-        i = i+1;
 end
 
 endmodule
